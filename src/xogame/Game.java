@@ -4,7 +4,7 @@ import java.util.Random;
 import java.util.Scanner;
 
 public class Game {
-    final int DIMENSION = 3;
+    final int DIMENSION = 7;
     Random random;
     Scanner console;
     Field field;
@@ -27,8 +27,8 @@ public class Game {
         console = new Scanner(System.in);
         playerSymbol = defineSymbols()[0];
         botSymbol = defineSymbols()[1];
-        player = new Player(playerSymbol, false);
-        bot = new Player(botSymbol, true);
+        player = new Player(playerSymbol, false, DIMENSION);
+        bot = new Player(botSymbol, true, DIMENSION);
         symbolName = getSymbolName(playerSymbol);
         isGameOver = false;
         cells = new char[DIMENSION][DIMENSION];
@@ -38,6 +38,7 @@ public class Game {
     private void gameCycle() {
         while (!isGameOver){
             player.move(cells, playerSymbol);
+            isGameOver = checkGameOver(cells, playerSymbol, botSymbol);
             if (isGameOver){
                 break;
             }
@@ -68,14 +69,49 @@ public class Game {
     }
 
     private boolean checkWin(char[][] cells, char symbol) {
-        return (cells[0][0] == symbol && cells[0][1] == symbol && cells[0][2] == symbol) ||
-                (cells[1][0] == symbol && cells[1][1] == symbol && cells[1][2] == symbol) ||
-                (cells[2][0] == symbol && cells[2][1] == symbol && cells[2][2] == symbol) ||
-                (cells[0][0] == symbol && cells[1][1] == symbol && cells[2][2] == symbol) ||
-                (cells[0][2] == symbol && cells[1][1] == symbol && cells[2][0] == symbol) ||
-                (cells[0][0] == symbol && cells[1][0] == symbol && cells[2][0] == symbol) ||
-                (cells[0][1] == symbol && cells[1][1] == symbol && cells[2][1] == symbol) ||
-                (cells[0][2] == symbol && cells[1][2] == symbol && cells[2][2] == symbol);
+        // Проверка горизонтальных линий
+        for (int i = 0; i < DIMENSION; i++) {
+            boolean isWin = true;
+            for (int j = 0; j < DIMENSION; j++) {
+                if (cells[i][j] != symbol) {
+                    isWin = false;
+                    break;
+                }
+            }
+            if (isWin) return true;
+        }
+
+        // Проверка вертикальных линий
+        for (int j = 0; j < DIMENSION; j++) {
+            boolean isWin = true;
+            for (int i = 0; i < DIMENSION; i++) {
+                if (cells[i][j] != symbol) {
+                    isWin = false;
+                    break;
+                }
+            }
+            if (isWin) return true;
+        }
+
+        // Проверка главной диагонали
+        boolean isWin = true;
+        for (int i = 0; i < DIMENSION; i++) {
+            if (cells[i][i] != symbol) {
+                isWin = false;
+                break;
+            }
+        }
+        if (isWin) return true;
+
+        // Проверка побочной диагонали
+        isWin = true;
+        for (int i = 0; i < DIMENSION; i++) {
+            if (cells[i][DIMENSION - 1 - i] != symbol) {
+                isWin = false;
+                break;
+            }
+        }
+        return isWin;
     }
 
     private boolean playerWins(char[][] cells, char symbolPlayer) {
@@ -93,7 +129,24 @@ public class Game {
         }
         return isBotWins;
     }
+
+    private boolean isDraw(char[][] cells) {
+        for (int i = 0; i < DIMENSION; i++) {
+            for (int j = 0; j < DIMENSION; j++) {
+                if (cells[i][j] == '*') {
+                    return false;
+                }
+            }
+        }
+        System.out.println("--------------------------------");
+        System.out.println("Ничья!");
+        return true;
+    }
+
     public boolean checkGameOver(char[][] cells, char symbolPlayer, char symbolBot) {
-        return playerWins(cells, symbolPlayer) || botWins(cells, symbolBot);
+        if (playerWins(cells, symbolPlayer) || botWins(cells, symbolBot)) {
+            return true;
+        }
+        return isDraw(cells);
     }
 }

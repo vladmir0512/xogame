@@ -4,32 +4,33 @@ import java.util.Random;
 import java.util.Scanner;
 
 public class Player {
-    char symbol;
     boolean isBot;
     Random random = new Random();
     Scanner console = new Scanner(System.in);
+    int dimension;
 
-    public Player(char symbol, boolean isBot) {
-        this.symbol = symbol;
+    public Player(char symbol, boolean isBot, int dimension) {
         this.isBot = isBot;
+        this.dimension = dimension;
     }
 
     public void move(char[][] cells, char symbol) {
         System.out.println("--------------------------------");
         while (true) {
-            int x,y;
+            int x, y;
             if (isBot) {
                 System.out.println("Ход противника!");
-                x = random.nextInt(3);
-                y = random.nextInt(3);
+                x = random.nextInt(dimension);
+                y = random.nextInt(dimension);
             } else {
                 System.out.println("Ваш ход!");
-                System.out.print("Введите x: ");
+                System.out.print("Введите x (0-" + (dimension-1) + "): ");
                 x = console.nextInt();
-                System.out.print("Введите y: ");
+                System.out.print("Введите y (0-" + (dimension-1) + "): ");
                 y = console.nextInt();
             }
-            if (!isCellEmpty(x, y, cells)) {
+            if (!isValidMove(x, y, cells)) {
+                System.out.println("Неверный ход! Попробуйте снова.");
                 continue;
             }
             cells[x][y] = symbol;
@@ -38,8 +39,10 @@ public class Player {
         Field.showField(cells);
     }
 
-    private boolean isCellEmpty(int x, int y, char[][] cells) {
-        return cells[x][y] == '*';
+    private boolean isValidMove(int x, int y, char[][] cells) {
+        return x >= 0 && x < dimension && 
+               y >= 0 && y < dimension && 
+               cells[x][y] == '*';
     }
 }
 
